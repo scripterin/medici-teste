@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEDICI TESTE</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="background"></div>
+
+<!-- Overlay reguli HR -->
+<div id="rulesOverlay" class="overlay">
+    <div id="rulesCard" class="rules-card">
+        <h2>Reguli pentru test</h2>
+        <div class="rules-list">
+            <p>1️⃣ <b>Conectați-vă cu Discord-ul ⭐️</b><br>Poate dura până la un minut să te poți autentifica!</p>
+            <p>2️⃣ <b>Verificați dacă aveți cooldown</b><br>Dacă ați susținut recent un test, este posibil să trebuiască să așteptați înainte de a da un altul.</p>
+            <p>3️⃣ <b>Selectați testul pe care doriți să îl susțineți</b><br>Alegeți testul corespunzător certificatului dorit.</p>
+            <p>4️⃣ <b>Solicitați codul o singură dată! ❗</b><br>Nu trimiteți mai multe cereri pentru același test.</p>
+            <p>5️⃣ <b>Așteptați cu răbdare să primiți codul de la un HR</b><br>După trimiterea cererii, un membru HR vă va trimite codul necesar.</p>
+            <p>❗ Nu aveți voie să cereți codul direct de la un HR! Respectați procedura și așteptați atribuirea codului în mod corect.</p>
+            <p>⚠️ NU DATI TESTELE DE PE TELEFON, POSIBIL SĂ NU VEDETI ÎNTREBĂRILE FULL / SA APARĂ UNELE BUG-uri</p>
+            <p>📩 Pentru orice nelămurire contactați: @[M-003] [Gl.] Alex Tudorescu, @[M-010] [SB.ST.] Mihail Parvu</p>
+            <p>🎥 Optional: să aveți filmare pe parcursul testului în caz că întâmpinați probleme.</p>
+        </div>
+
+        <!-- Timer -->
+        <div id="timer" style="margin-top: 15px; font-weight:600; font-size:18px;">5</div>
+        <!-- Bara progres timer -->
+        <div id="timerProgressContainer" style="width:100%; height:6px; background:rgba(255,255,255,0.1); border-radius:3px; margin-top:5px;">
+            <div id="timerProgress" style="width:0%; height:100%; background:#00c3ff; border-radius:3px;"></div>
+        </div>
+
+        <!-- Checkbox, ascuns la început -->
+        <div id="checkboxContainer" style="display:none; margin-top:20px;">
+            <label>
+                <input type="checkbox" id="acceptRules">
+                Am citit și accept regulile
+            </label>
+        </div>
+
+        <!-- Buton accesează, ascuns la început -->
+        <div id="accessBtnContainer" style="display:none; margin-top: 15px; text-align:center;">
+            <button id="accessBtn" class="start">Accesează</button>
+        </div>
+    </div>
+</div>
+
+<!-- Card utilizator dreapta sus -->
+<div id="userCard" class="user-card"></div>
+
+<!-- Dashboard teste -->
+<div class="card">
+    <h1>Departament Medical</h1>
+    <p>Selectează testul dorit</p>
+
+    <div class="tests">
+        <div class="test" onclick="selectTest(this)">RADIO</div>
+        <div class="test" onclick="selectTest(this)">BLS</div>
+        <div class="test" onclick="selectTest(this)">REZIDENȚIAT</div>
+        <div class="test" onclick="selectTest(this)">SMURD TEORETIC</div>
+    </div>
+
+    <div class="code-box">
+        <input type="text" placeholder="Introdu codul...">
+        <button onclick="generate(selectedTest)">Solicită</button>
+    </div>
+
+    <button class="start" onclick="startTestWithCode()">Începe Testul</button>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
