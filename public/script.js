@@ -1,3 +1,69 @@
+/**
+ * =================================================
+ * PROTECȚIE ȘI AUTORIZARE (DASHBOARD REDIRECT)
+ * =================================================
+ */
+if (window.location.pathname.includes("dashboard.html")) {
+    fetch('/api/user')
+    .then(res => {
+        if (!res.ok) window.location.href = "index.html";
+    })
+    .catch(() => {
+        window.location.href = "index.html";
+    });
+}
+
+/**
+ * =================================================
+ * SISTEM NOTIFICĂRI (TOAST) - MODIFICAT
+ * =================================================
+ */
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+
+    let icon = '✔';
+    if (type === 'error') icon = '✖';
+    if (type === 'warning') icon = '⚠';
+
+    toast.innerHTML = `
+        <div class="toast-content">
+            <span class="toast-icon">${icon}</span>
+            <span class="toast-message">${message}</span>
+        </div>
+        <span class="toast-close">&times;</span>
+    `;
+
+    container.appendChild(toast);
+
+    // Apariție cu animație
+    setTimeout(() => toast.classList.add('show'), 10);
+
+    // Dispare automat după 5 secunde
+    const autoDismiss = setTimeout(() => dismissToast(toast), 5000);
+
+    // Dispare instant dacă apăsăm X
+    toast.querySelector('.toast-close').addEventListener('click', () => {
+        clearTimeout(autoDismiss);
+        dismissToast(toast);
+    });
+}
+
+function dismissToast(toast) {
+    toast.classList.remove('show');
+    toast.addEventListener('transitionend', () => {
+        if (toast.parentElement) toast.remove();
+    });
+}
+
+function dismissToast(toast) {
+    toast.classList.remove('show');
+    toast.addEventListener('transitionend', () => toast.remove());
+}
+
 // ================= Select Test =================
 let selectedTest = null;
 
@@ -5,6 +71,7 @@ function selectTest(elem) {
     selectedTest = elem.innerText.trim();
     document.querySelectorAll('.test').forEach(t => t.classList.remove('selected'));
     elem.classList.add('selected');
+    showToast(`Ai selectat testul: ${selectedTest}`, 'success');
 }
 
 // ================= Populează card user =================
@@ -28,7 +95,7 @@ fetch('/api/user')
 
 // ================= Generează cod cu Cooldown =================
 function generate(test) {
-    if (!test) return alert("Selectează mai întâi un test!");
+    if (!test) return showToast("Selectează mai întâi un test!", "warning");
 
     const lastRequest = localStorage.getItem(`lastRequest_${test}`);
     const now = Date.now();
@@ -36,7 +103,7 @@ function generate(test) {
 
     if (lastRequest && (now - lastRequest < cooldown)) {
         const remainingSeconds = Math.ceil((cooldown - (now - lastRequest)) / 1000);
-        return alert(`Ai solicitat deja un cod pentru ${test}! Mai așteaptă ${remainingSeconds} secunde.`);
+        return showToast(`Ai solicitat deja un cod pentru ${test}! Mai așteaptă ${remainingSeconds} secunde.`, "error");
     }
 
     fetch('/api/generate', {
@@ -47,20 +114,20 @@ function generate(test) {
     .then(res => res.json())
     .then(data => {
         if (data.error) {
-            alert("Eroare: " + data.error);
+            showToast("Eroare: " + data.error, "error");
         } else {
             localStorage.setItem(`lastRequest_${test}`, Date.now());
-            alert("Cod generat cu succes! Așteaptă confirmarea unui HR.");
+            showToast("Cod generat cu succes! Așteaptă confirmarea unui HR.", "success");
         }
     })
-    .catch(() => alert("Eroare server la generare."));
+    .catch(() => showToast("Eroare server la generare.", "error"));
 }
 
 // ================= Începe Testul (Verificare One-Use) =================
 async function startTestWithCode() {
     const codeInput = document.querySelector('.code-box input').value.trim();
-    if (!selectedTest) return alert("Selectează un test!");
-    if (!codeInput) return alert("Introdu codul!");
+    if (!selectedTest) return showToast("Selectează un test!", "warning");
+    if (!codeInput) return showToast("Introdu codul!", "warning");
 
     try {
         const response = await fetch('/api/verify-code', {
@@ -74,16 +141,15 @@ async function startTestWithCode() {
         if (data.success) {
             proceedToTest(codeInput);
         } else {
-            alert("Eroare: " + (data.message || "Cod invalid sau deja folosit!"));
+            showToast("Eroare: " + (data.message || "Cod invalid sau deja folosit!"), "error");
         }
 
     } catch (error) {
-        // Fallback dacă serverul nu are ruta setată (Linia 118 fix)
         console.error("Server fallback activat.");
         const usedCodes = JSON.parse(localStorage.getItem('usedCodes') || "[]");
 
         if (usedCodes.includes(codeInput)) {
-            alert("Acest cod a fost deja folosit!");
+            showToast("Acest cod a fost deja folosit!", "error");
         } else {
             usedCodes.push(codeInput);
             localStorage.setItem('usedCodes', JSON.stringify(usedCodes));
@@ -101,8 +167,12 @@ function proceedToTest(code) {
         "SMURD TEORETIC": "smurd-test.html"
     };
     const target = pages[selectedTest.toUpperCase()];
-    if (target) window.location.href = target;
-    else alert("Pagina testului nu a fost găsită.");
+    if (target) {
+        showToast("Cod validat! Te redirecționăm...", "success");
+        setTimeout(() => window.location.href = target, 1000);
+    } else {
+        showToast("Pagina testului nu a fost găsită.", "error");
+    }
 }
 
 // ================= Overlay Reguli (RESTAURAT) =================
@@ -116,7 +186,7 @@ const rulesCard = document.getElementById("rulesCard");
 
 if (rulesOverlay) {
     rulesOverlay.classList.add('show');
-    rulesCard.classList.add('show');
+    if(rulesCard) rulesCard.classList.add('show');
 
     let countdown = 5; 
     let progressValue = 0;
